@@ -10,8 +10,6 @@ namespace Simple.DynamicWebApi.Conventions;
 
 /// <summary>
 /// 动态接口控制器应用模型转换器
-/// 参考：https://www.cnblogs.com/h82258652/p/12454554.html
-///       https://github.com/dotnetauth/Panda.DynamicWebApi
 /// </summary>
 public class DynamicWebApiConvention : IApplicationModelConvention
 {
