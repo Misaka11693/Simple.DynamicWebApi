@@ -13,8 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Simple.DynamicWebApiExample\Simple.DynamicWebApiExample.csproj" />
-    <ProjectReference Include="..\Simple.DynamicWebApi\Simple.DynamicWebApi.csproj" />
+    <ProjectReference Include="..\..\src\Simple.DynamicWebApi\Simple.DynamicWebApi.csproj" />
+    <ProjectReference Include="..\DynamicWebApiSample\DynamicWebApiSample.csproj" />
+    <ProjectReference Include="..\Simple.DynamicWebApiExample\DynamicWebApiSample.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Simple.DynamicWebApi.Attributes;
-using Simple.DynamicWebApi.Dependencies;
-using Simple.DynamicWebApiExample.Entities;
+using Simple.DynamicWebApiSample.Entities;
 
-namespace Simple.DynamicWebApiExample;
+namespace Simple.DynamicWebApiSample;
 
 /// <summary>
 /// 用户领域服务
 /// </summary>
-public class UserAppService : IApplicationService
+[DynamicApiController]
+//[Route("api/[controller]")]
+public class UserAppService
 {
     private static List<User> _users = new();
 

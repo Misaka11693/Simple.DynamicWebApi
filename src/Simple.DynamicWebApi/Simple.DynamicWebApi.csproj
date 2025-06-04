@@ -5,13 +5,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
-    <Title>Simple.DynamicWebApi</Title>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <RepositoryUrl>https://github.com/Misaka11693/Simple.DynamicWebApi</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/Misaka11693/Simple.DynamicWebApi</PackageProjectUrl>
-    <Description>Lightweight component library for dynamically generating RESTful Web APIs.</Description>
-    <Authors>liangjian</Authors>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Simple.DynamicWebApi\Simple.DynamicWebApi.csproj" />
+    <ProjectReference Include="..\..\src\Simple.DynamicWebApi\Simple.DynamicWebApi.csproj" />
   </ItemGroup>
 
 </Project>
