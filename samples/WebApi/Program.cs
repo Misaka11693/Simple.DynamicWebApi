@@ -1,5 +1,6 @@
 
-using Simple.DynamicWebApi.Extensions;
+
+using Simple.DynamicWebApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
