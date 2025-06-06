@@ -49,6 +49,6 @@ internal class ControllerSelector
             return false;
         }
 
-        return typeof(IDynamicApiController).IsAssignableFrom(type) || type.IsDefined(typeof(DynamicApiControllerAttribute), false);
+        return typeof(IDynamicWebApi).IsAssignableFrom(type) || type.IsDefined(typeof(DynamicApiAttribute), false);
     }
 }

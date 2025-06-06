@@ -10,6 +10,6 @@ namespace Simple.DynamicWebApi;
 /// 动态 WebApi 控制器标记特性
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class DynamicApiControllerAttribute : Attribute
+public class DynamicApiAttribute : Attribute
 {
 }

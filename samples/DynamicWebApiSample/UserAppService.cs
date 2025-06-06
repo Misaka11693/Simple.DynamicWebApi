@@ -8,7 +8,7 @@ namespace Simple.DynamicWebApiSample;
 /// <summary>
 /// 用户领域服务
 /// </summary>
-[DynamicApiController]
+[DynamicApi]
 //[Route("api/[controller]")]
 public class UserAppService
 {

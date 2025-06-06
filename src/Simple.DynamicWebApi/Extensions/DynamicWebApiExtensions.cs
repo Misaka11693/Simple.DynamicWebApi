@@ -13,11 +13,11 @@ public static class DynamicWebApiExtensions
     /// <param name="services">IServiceCollection类型的服务集合。</param>
     /// <param name="configureOptions">用于配置DynamicWebApiOptions的操作，可空。</param>
     /// <returns>IServiceCollection类型的服务集合。</returns>
-    public static IServiceCollection AddDynamicApiController(this IServiceCollection services, Action<DynamicWebApiSettingsOptions> configureOptions)
+    public static IServiceCollection AddDynamicWebApi(this IServiceCollection services, Action<DynamicWebApiSettingsOptions> configureOptions)
     {
         var dynamicWebApiOptions = new DynamicWebApiSettingsOptions();
         configureOptions.Invoke(dynamicWebApiOptions);
-        return services.AddDynamicApiController(dynamicWebApiOptions);
+        return services.AddDynamicWebApi(dynamicWebApiOptions);
     }
 
 
@@ -28,7 +28,7 @@ public static class DynamicWebApiExtensions
     /// <param name="configureOptions">动态WebApi配置选项</param>
     /// <returns></returns>
     /// <exception cref="InvalidOperationException">IServiceCollection类型的服务集合。</exception>
-    public static IServiceCollection AddDynamicApiController(this IServiceCollection services, DynamicWebApiSettingsOptions? dynamicWebApiOptions = default)
+    public static IServiceCollection AddDynamicWebApi(this IServiceCollection services, DynamicWebApiSettingsOptions? dynamicWebApiOptions = default)
     {
         dynamicWebApiOptions ??= new DynamicWebApiSettingsOptions();
 
@@ -38,12 +38,12 @@ public static class DynamicWebApiExtensions
             return services;
         }
 
-        //AddDynamicApiController 必须在 AddControllers 之后调用
+        //AddDynamicWebApi 必须在 AddControllers 之后调用
         var partManager = services.FirstOrDefault(s => s.ServiceType == typeof(ApplicationPartManager))?.ImplementationInstance as ApplicationPartManager;
         if (partManager is null)
         {
             throw new InvalidOperationException(
-                $" {nameof(AddDynamicApiController)} 必须在在 {nameof(MvcServiceCollectionExtensions.AddControllers)} 之后进行调用"
+                $" {nameof(AddDynamicWebApi)} 必须在在 {nameof(MvcServiceCollectionExtensions.AddControllers)} 之后进行调用"
             );
         }
 
