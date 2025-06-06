@@ -2,11 +2,9 @@
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Simple.DynamicWebApi.Helper;
-using Simple.DynamicWebApi.Options;
 using System.Reflection;
 
-namespace Simple.DynamicWebApi.Conventions;
+namespace Simple.DynamicWebApi;
 
 /// <summary>
 /// 动态接口控制器应用模型转换器

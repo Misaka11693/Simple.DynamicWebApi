@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.Extensions.DependencyInjection;
-using Simple.DynamicWebApi.Conventions;
-using Simple.DynamicWebApi.Options;
-using Simple.DynamicWebApi.Providers;
 
-namespace Simple.DynamicWebApi.Extensions;
+namespace Simple.DynamicWebApi;
 
 public static class DynamicWebApiExtensions
 {

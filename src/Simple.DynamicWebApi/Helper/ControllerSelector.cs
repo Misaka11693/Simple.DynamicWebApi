@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Simple.DynamicWebApi.Attributes;
-using Simple.DynamicWebApi.Dependencies;
 
-namespace Simple.DynamicWebApi.Helper;
+namespace Simple.DynamicWebApi;
 
 /// <summary>
 /// 控制器选择器，用于判断类型是否为动态API控制器。
@@ -51,8 +49,6 @@ internal class ControllerSelector
             return false;
         }
 
-        return typeof(IDynamicApiController).IsAssignableFrom(type)
-            || typeof(IApplicationService).IsAssignableFrom(type)
-            || type.IsDefined(typeof(DynamicApiControllerAttribute), false);
+        return typeof(IDynamicApiController).IsAssignableFrom(type) || type.IsDefined(typeof(DynamicApiControllerAttribute), false);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Simple.DynamicWebApi.Dependencies;
+﻿namespace Simple.DynamicWebApi;
 
 /// <summary>
 /// 动态 WebApi 控制器标记接口

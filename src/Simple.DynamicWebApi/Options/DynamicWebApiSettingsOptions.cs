@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Simple.DynamicWebApi.Options;
+namespace Simple.DynamicWebApi;
 
 /// <summary>
 /// 动态 WebApi 控制器配置选项

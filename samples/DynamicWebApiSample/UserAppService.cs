@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Simple.DynamicWebApi.Attributes;
+using Simple.DynamicWebApi;
 using Simple.DynamicWebApiSample.Entities;
 
 namespace Simple.DynamicWebApiSample;

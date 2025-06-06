@@ -1,16 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>False</GenerateDocumentationFile>
+		<Title>Simple.DynamicWebApi</Title>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageReleaseNotes></PackageReleaseNotes>
+		<RepositoryUrl>https://github.com/Misaka11693/Simple.DynamicWebApi</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/Misaka11693/Simple.DynamicWebApi</PackageProjectUrl>
+		<Description>Lightweight component library for dynamically generating RESTful Web APIs.</Description>
+		<Authors>LiangJian</Authors>
+		<Version>1.0.1</Version>
+	</PropertyGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.4" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
-	  <PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.4" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyModel" Version="9.0.4" />
+	</ItemGroup>
 
 </Project>

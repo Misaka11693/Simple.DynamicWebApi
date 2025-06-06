@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace Simple.DynamicWebApi.Helper;
+namespace Simple.DynamicWebApi;
 
 /// <summary>
 /// DynamicWebApiHelper 静态帮助类。
