@@ -23,8 +23,8 @@ builder.Services.AddSwaggerGen(o =>
 //添加动态WebApi控制器
 builder.Services.AddDynamicWebApi(o =>
 {
-    //设置默认路由前缀
-    o.DefaultRoutePrefix = "testApi";
+    //添加根路径到路由中
+    o.AddRootPathToRoute = true;
 });
 
 

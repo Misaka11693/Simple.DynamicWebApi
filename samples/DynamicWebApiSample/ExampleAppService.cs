@@ -21,3 +21,21 @@
 //        }
 //    }
 //}
+using Microsoft.AspNetCore.Mvc;
+using Simple.DynamicWebApi;
+
+public class AppleService : IDynamicWebApi
+{
+    [HttpGet("{id:int}")]
+    public int GetApple(int id)
+    {
+        return id;
+    }
+}
+
+[DynamicApi]
+public class OrangeService
+{
+    [HttpGet("{id:int}")]
+    public int GetOrange(int id) => id;
+}
