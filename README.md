@@ -17,7 +17,7 @@ builder.Services.AddDynamicWebApi();
 
 #### 第三步：集成 Swagger（推荐）
 ```csharp
-// 添加S wagger 服务
+// 添加 Swagger 服务
 builder.Services.AddSwaggerGen(o =>
 {
     // 控制哪些 API 操作应包含在 Swagger 文档中
@@ -61,7 +61,7 @@ public class AppleService : IDynamicWebApi
 using Simple.DynamicWebApi;
 
 [DynamicApi]
-public class OrangeService : IDynamicWebApi
+public class OrangeService
 {
     [HttpGet("{id:int}")]
     public int GetOrange(int id) => id;
