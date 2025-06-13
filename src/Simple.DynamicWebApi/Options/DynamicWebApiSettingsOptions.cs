@@ -59,12 +59,12 @@ public sealed class DynamicWebApiSettingsOptions
     /// <summary>
     /// 默认的约定前缀,用于匹配Action名称与Http方法
     /// </summary>
-    public Dictionary<string, string[]> ConventionalPrefixes { get; set; } = new Dictionary<string, string[]>
+    public Dictionary<string, string[]> ConventionalPrefixes = new Dictionary<string, string[]>
     {
-        ["GET"] = ["Get", "Query", "Find", "Fetch", "Select"],
-        ["POST"] = ["Post", "Create", "Add", "Insert", "Submit", "Save"],
-        ["PATCH"] = ["Patch"],
-        ["PUT"] = ["Put", "Update"],
-        ["DELETE"] = ["Delete", "Remove", "Clear"],
+        { "GET", new[] { "Get", "Query", "Find", "Fetch", "Select" } },
+        { "POST", new[] { "Post", "Create", "Add", "Insert", "Submit", "Save" } },
+        { "PATCH", new[] { "Patch" } },
+        { "PUT", new[] { "Put", "Update" } },
+        { "DELETE", new[] { "Delete", "Remove", "Clear" } }
     };
 }
