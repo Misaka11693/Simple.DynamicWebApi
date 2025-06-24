@@ -42,7 +42,7 @@ public sealed class DynamicWebApiSettingsOptions
     public bool AddRootPathToRoute { get; set; } = false;
 
     /// <summary>
-    /// 是否移除Action的前缀(默认移除) 例如GetUserInfo => UserInfp
+    /// 是否移除Action的前缀(默认移除) 例如GetUserInfo => UserInfo
     /// </summary>
     public bool RemoveActionPrefix { get; set; } = true;
 

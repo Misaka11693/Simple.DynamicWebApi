@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Xml.Linq;
 
 namespace WebApplication1.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    //[Route("api")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -17,8 +19,11 @@ namespace WebApplication1.Controllers
         {
             _logger = logger;
         }
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        //[HttpGet(Name = "ABCGetWeatherForecast")]
+        [Route("asd" + "[action]")]
+        [HttpPost]
+
+        public IEnumerable<WeatherForecast> GetASD(int a, int b)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
@@ -28,5 +33,16 @@ namespace WebApplication1.Controllers
             })
             .ToArray();
         }
+
+        //[HttpGet(template: "aaa/{id}")]
+        //public int GetById(int id)
+        //{
+        //    return id;
+        //}
+
+        //public string GetHelloWorld112([FromRoute] int a)
+        //{
+        //    return "Hello World";
+        //}
     }
 }

@@ -24,7 +24,7 @@ builder.Services.AddSwaggerGen(o =>
 builder.Services.AddDynamicWebApi(o =>
 {
     //添加根路径到路由中
-    o.AddRootPathToRoute = true;
+    //o.AddRootPathToRoute = true;
 });
 
 
