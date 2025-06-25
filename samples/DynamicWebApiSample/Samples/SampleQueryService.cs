@@ -11,7 +11,7 @@ namespace DynamicWebApiSample.Samples;
 /// <summary>
 /// 动态Web API示例服务类
 /// </summary>
-public class SampleQueryService : IDynamicWebApi
+public class SampleQueryService  : IDynamicWebApi
 {
     /// <summary>
     /// SampleDto
@@ -28,7 +28,6 @@ public class SampleQueryService : IDynamicWebApi
         new SampleDto(3, "Sample C", true),
         new SampleDto(4, "Sample D", true)
     };
-
 
     public SampleDto Get(int id)
     {

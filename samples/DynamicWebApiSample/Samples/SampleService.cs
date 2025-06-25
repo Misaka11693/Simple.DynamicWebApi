@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace DynamicWebApiSample.Samples
 {
     [Route("api/[controller]")]
-    public class SampleService : IDynamicWebApi
+    public class SampleService  : IDynamicWebApi
     {
         private static List<User> _users = new List<User>()
         {
@@ -17,9 +17,14 @@ namespace DynamicWebApiSample.Samples
             new User() { Name = "Jane", Age = 25, Email = "jane@example.com" }
         };
 
-        public dynamic Get()
+        public string Get()
         {
-            return new { Name = "DynamicWebApiSample" };
+            return "Hello, Dynamic Web API!";
+        }
+
+        public dynamic Get(string name, int age)
+        {
+            return _users.Where(u => u.Name == name && u.Age == age);
         }
 
         public User Post(User user)

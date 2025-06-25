@@ -1,12 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Routing.Template;
-using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -34,7 +30,7 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
             ConfigureDynamicWebApi(controller);
         }
     }
-    
+
     private void ConfigureDynamicWebApi(ControllerModel controller)
     {
         ConfigureApiExplorer(controller);
@@ -65,6 +61,7 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
 
     private void ConfigureAction(ActionModel action)
     {
+        ValidateAction(action);
         RemoveEmptySelectors(action.Selectors);
         ConfigureActionSelectors(action);
         ConfigureActionHttpMethodAttribute(action);
@@ -73,51 +70,19 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         ConfigureActionRouteAttribute(action);
     }
 
-    private void ConfigureActionSelectors(ActionModel action)
+
+
+    internal void RemoveEmptySelectors(IList<SelectorModel> selectors)
     {
-        if (!action.Selectors.Any())
+        for (int i = selectors.Count - 1; i >= 0; i--)
         {
-            action.Selectors.Add(new SelectorModel());
-        }
-    }
-
-    private string? GenerateControllerRouteTemplate(ControllerModel controller)
-    {
-        if (controller.Selectors.Any(s => s.AttributeRouteModel != null))
-        {
-            return null;
-        }
-
-        var segments = new List<string>();
-
-        // 添加路由前缀
-        if (_options.AddRoutePrefixToRoute && !string.IsNullOrWhiteSpace(_options.DefaultRoutePrefix))
-        {
-            segments.Add(_options.DefaultRoutePrefix);
-        }
-
-        // 添加根路径
-        if (_options.AddRootPathToRoute && !string.IsNullOrWhiteSpace(_options.DefaultRootPath))
-        {
-            segments.Add(_options.DefaultRootPath);
-        }
-
-        // 添加控制器令牌
-        segments.Add("[controller]");
-
-        return (string.Join("/", segments));
-    }
-
-    private void ConfigureActionHttpMethodAttribute(ActionModel action)
-    {
-        foreach (var selector in action.Selectors)
-        {
-            if (selector.ActionConstraints.OfType<HttpMethodActionConstraint>().Any())
+            var selector = selectors[i];
+            if (selector.AttributeRouteModel == null
+                && (selector.ActionConstraints == null || selector.ActionConstraints.Count <= 0)
+                && (selector.EndpointMetadata == null || selector.EndpointMetadata.Count <= 0))
             {
-                continue;
+                selectors.RemoveAt(i);
             }
-            var httpMethod = SelectHttpMethod(action);
-            selector.ActionConstraints.Add(new HttpMethodActionConstraint(new[] { httpMethod }));
         }
     }
 
@@ -133,6 +98,55 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
 
     private void ConfigureControllerRouteAttributes(ControllerModel controller)
     {
+    }
+
+    private void ValidateAction(ActionModel action)
+    {
+        //TODO:是否允许存在多个路由特性与HttpMethod特性？
+
+        if (action.Attributes.Any(a => a is RouteAttribute))
+        {
+            throw new InvalidOperationException($"针对控制器类型‘{action.Controller.ControllerType}’上的操作‘{action.ActionName}’，不允许存在路由特性。");
+        }
+
+        if (action.Selectors.Count(s => s.ActionConstraints.OfType<HttpMethodActionConstraint>().Any()) > 1)
+        {
+            throw new InvalidOperationException($"针对控制器类型‘{action.Controller.ControllerType}’上的操作‘{action.ActionName}’，不允许存在多个HTTP方法。");
+        }
+    }
+
+    private void ConfigureActionSelectors(ActionModel action)
+    {
+        if (!action.Selectors.Any())
+        {
+            action.Selectors.Add(new SelectorModel());
+        }
+    }
+
+    private void ConfigureActionHttpMethodAttribute(ActionModel action)
+    {
+        var selector = action.Selectors.First();
+
+        var existingConstraint = selector.ActionConstraints
+            .FirstOrDefault(a => a is HttpMethodActionConstraint) as HttpMethodActionConstraint;
+
+        bool hasValidConstraint = existingConstraint != null &&
+                                 existingConstraint.HttpMethods != null &&
+                                 existingConstraint.HttpMethods.Any();
+
+        if (hasValidConstraint)
+        {
+            return; // 已有有效约束则退出
+        }
+
+        // 移除无效约束
+        if (existingConstraint != null)
+        {
+            selector.ActionConstraints.Remove(existingConstraint);
+        }
+
+        var httpMethod = SelectHttpMethod(action);
+        selector.ActionConstraints.Add(new HttpMethodActionConstraint(new[] { httpMethod }));
     }
 
     private void ConfigureActionName(ActionModel action)
@@ -162,22 +176,140 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         }
     }
 
-    internal void RemoveEmptySelectors(IList<SelectorModel> selectors)
+    private void ConfigureComplexParameterBinding(ActionModel action)
     {
-        for (int i = selectors.Count - 1; i >= 0; i--)
+        var httpMethod = SelectHttpMethod(action);
+
+        // 如果是GET请求，不自动处理复杂参数绑定
+        if (httpMethod.Equals("Get", StringComparison.OrdinalIgnoreCase)) return;
+
+        foreach (var parameter in action.Parameters)
         {
-            var selector = selectors[i];
-            if (selector.AttributeRouteModel == null
-                && (selector.ActionConstraints == null || selector.ActionConstraints.Count <= 0)
-                && (selector.EndpointMetadata == null || selector.EndpointMetadata.Count <= 0))
+            if (parameter.BindingInfo != null) continue;
+
+            if (TypeHelper.IsComplexType(parameter.ParameterType))
             {
-                selectors.RemoveAt(i);
+                parameter.BindingInfo = BindingInfo.GetBindingInfo(new[] { new FromBodyAttribute() });
             }
         }
     }
 
-    internal string SelectHttpMethod(ActionModel action)
+    private void ConfigureActionRouteAttribute(ActionModel action)
     {
+
+        foreach (var selector in action.Selectors)
+        {
+            string? template = string.Empty;// 路由模板为空
+            string? actionRouteTemplate = selector.AttributeRouteModel?.Template;// Action路由模板
+            string? controllerRouteTemplate = GetControllerRouteTemplate(action.Controller);// 控制器路由模板，为空时，则说明控制器不存在路由模版
+
+            if (!string.IsNullOrEmpty(actionRouteTemplate))
+            {
+                //当控制器路由模版为空，Action存在路由模板时，生成路由模板并与控制器路由模板拼接
+                if (string.IsNullOrEmpty(controllerRouteTemplate))
+                {
+                    controllerRouteTemplate = GenerateControllerRouteTemplate(action.Controller);
+                    template = $"{controllerRouteTemplate}/{actionRouteTemplate}";
+                }
+                else
+                {
+                    template = actionRouteTemplate;
+                }
+
+                ValidateRouteTemplate(action, selector, template);
+                selector.AttributeRouteModel = new AttributeRouteModel(new RouteAttribute(template));
+                continue;
+            }
+
+            // 1. 处理空ActionName
+            if (string.IsNullOrEmpty(action.ActionName) && action.Parameters.Count == 0 )
+            {
+                if (string.IsNullOrEmpty(controllerRouteTemplate))
+                {
+                    controllerRouteTemplate = GenerateControllerRouteTemplate(action.Controller);
+                    template = controllerRouteTemplate;
+                }
+
+            }
+            // 2. 常规动作路由生成
+            else
+            {
+                // 检查控制器路由模版是否包含 [action] 令牌
+                bool controllerRouteTemplateContainsActionToken = TemplateContainsActionToken(controllerRouteTemplate);
+
+                //  ActionName 不为空且控制器路由不包含 [action] 时，添加 [action]
+                string? actionRoute = (!string.IsNullOrEmpty(action.ActionName) && !controllerRouteTemplateContainsActionToken) ? "[action]" : null;
+
+                if (string.IsNullOrEmpty(controllerRouteTemplate))
+                {
+                    controllerRouteTemplate = GenerateControllerRouteTemplate(action.Controller);
+                    template = controllerRouteTemplate;
+                }
+
+                if (!string.IsNullOrEmpty(actionRoute))
+                {
+                    if (!string.IsNullOrEmpty(template))
+                    {
+                        template = $"{template}/{actionRoute}";
+                    }
+                    else
+                    {
+                        template = actionRoute;
+                    }
+                }
+
+            }
+
+            //为模板添加参数路由信息
+            template = AddParametersToRoute(template, action);
+            ValidateRouteTemplate(action, selector, template);
+
+            if (!string.IsNullOrWhiteSpace(template))
+            {
+                selector.AttributeRouteModel = new AttributeRouteModel(new RouteAttribute(template));
+            }
+        }
+    }
+
+    private string GenerateControllerRouteTemplate(ControllerModel controller)
+    {
+        var segments = new List<string>();
+
+        // 添加路由前缀
+        if (_options.AddRoutePrefixToRoute && !string.IsNullOrWhiteSpace(_options.DefaultRoutePrefix))
+        {
+            segments.Add(_options.DefaultRoutePrefix);
+        }
+
+        // 添加根路径
+        if (_options.AddRootPathToRoute && !string.IsNullOrWhiteSpace(_options.DefaultRootPath))
+        {
+            segments.Add(_options.DefaultRootPath);
+        }
+
+        // 添加控制器令牌
+        segments.Add("[controller]");
+
+        return (string.Join("/", segments));
+    }
+
+    private string SelectHttpMethod(ActionModel action)
+    {
+        var selector = action.Selectors.FirstOrDefault();
+        if (selector != null)
+        {
+            var httpMethodConstraint = selector.ActionConstraints
+                .FirstOrDefault(a => a is HttpMethodActionConstraint) as HttpMethodActionConstraint;
+
+            if (httpMethodConstraint != null)
+            {
+                if (httpMethodConstraint.HttpMethods != null && httpMethodConstraint.HttpMethods.Any())
+                {
+                    return httpMethodConstraint.HttpMethods.First();
+                }
+            }
+        }
+
         var httpMethodAttr = action.ActionMethod.GetCustomAttributes()
             .FirstOrDefault(a => a is HttpMethodAttribute) as HttpMethodAttribute;
 
@@ -230,81 +362,83 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         }
     }
 
-    private void ConfigureActionRouteAttribute(ActionModel action)
+    private string? GetControllerRouteTemplate(ControllerModel controller)
     {
-        foreach (var selector in action.Selectors)
-        {
-            if (selector.AttributeRouteModel != null)
-            {
-                ValidateRouteTemplate(action, selector, selector.AttributeRouteModel.Template);
-                continue;
-            }
-
-            string? template;
-
-            // 1. 处理空ActionName
-            if (string.IsNullOrEmpty(action.ActionName))
-            {
-                template = GenerateControllerRouteTemplate(action.Controller);
-            }
-            // 2. 常规动作路由生成
-            else
-            {
-                var controllerRoute = GenerateControllerRouteTemplate(action.Controller);
-
-                // 检查控制器路由是否包含 [action] 令牌
-                bool controllerRouteContainsActionToken = ControllerRouteContainsActionToken(action.Controller);
-
-                string? actionRoute = controllerRouteContainsActionToken ? null : "[action]";
-
-                if (string.IsNullOrEmpty(controllerRoute))
-                {
-                    template = actionRoute;
-                }
-                else if (string.IsNullOrEmpty(actionRoute))
-                {
-                    template = controllerRoute;
-                }
-                else
-                {
-                    template = $"{controllerRoute}/{actionRoute}";
-                }
-            }
-
-            ValidateRouteTemplate(action, selector, template);
-
-            if (!string.IsNullOrWhiteSpace(template))
-            {
-                selector.AttributeRouteModel = new AttributeRouteModel(new RouteAttribute(template));
-            }
-        }
-    }
-
-    private bool ControllerRouteContainsActionToken(ControllerModel controller)
-    {
-        // 获取控制器第一个选择器的路由模板
         var controllerRouteTemplate = controller.Selectors
             .FirstOrDefault()
             ?.AttributeRouteModel
             ?.Template;
-
-        // 检查模板是否包含 [action] 令牌（不区分大小写）
-        return !string.IsNullOrEmpty(controllerRouteTemplate) &&
-               controllerRouteTemplate.Contains("[action]", StringComparison.OrdinalIgnoreCase);
+        return controllerRouteTemplate;
     }
 
-    private void ConfigureComplexParameterBinding(ActionModel action)
+    private bool TemplateContainsActionToken(string? template)
     {
-        foreach (var parameter in action.Parameters)
+        // 检查模板是否包含 [action] 令牌（不区分大小写）
+        return !string.IsNullOrEmpty(template) &&
+               template.Contains("[action]", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string? AddParametersToRoute(string? template, ActionModel action)
+    {
+        if (string.IsNullOrWhiteSpace(template))
         {
-            if (parameter.BindingInfo != null) continue;
-
-            if (TypeHelper.IsSimpleType(parameter.ParameterType) ||
-                TypeHelper.IsFileType(parameter.ParameterType))
-                continue;
-
-            // 为复杂类型添加 [FromBody] 特性
-            parameter.BindingInfo = BindingInfo.GetBindingInfo(new[] { new FromBodyAttribute() });
+            template = string.Empty;
         }
+
+        if (!action.Parameters.Any())
+        {
+            return template;
+        }
+
+        var httpMethod = SelectHttpMethod(action).ToUpperInvariant();
+
+        var pathParameters = GetSuitablePathParameters(action, httpMethod);
+
+        if (!pathParameters.Any())
+        {
+            return template;
+        }
+
+        // 确保模板以斜杠结尾
+        if (!string.IsNullOrEmpty(template) && !template.EndsWith('/'))
+        {
+            template += "/";
+        }
+
+        // 构建路径参数部分（按方法参数顺序）
+        var parametersSegment = string.Join("/",pathParameters.Select(p => $"{{{p.Name.ToKebabCase()}}}"));
+
+        return template + parametersSegment;
+    }
+
+    private IList<ParameterModel> GetSuitablePathParameters(ActionModel action, string httpMethod)
+    {
+        var allParameters = action.Parameters.ToList();
+        var suitableParameters = new List<ParameterModel>();
+
+        switch (httpMethod)
+        {
+            case "GET":
+            case "DELETE":
+            case "HEAD":
+                // 对于GET/DELETE/HEAD：所有适合作为路由参数的类型
+                suitableParameters.AddRange(allParameters.Where(p =>
+                    TypeHelper.IsSuitableForRoute(p.ParameterType)));
+                break;
+
+            case "POST":
+            case "PUT":
+            case "PATCH":
+                // 对于POST/PUT/PATCH：只添加名为"id"的适合参数
+                suitableParameters.AddRange(allParameters.Where(p =>
+                    p.Name.Equals("id", StringComparison.OrdinalIgnoreCase) &&
+                    TypeHelper.IsSuitableForRoute(p.ParameterType)));
+                break;
+        }
+
+        // 保持原始参数顺序
+        return suitableParameters
+            .OrderBy(p => allParameters.IndexOf(p))
+            .ToList();
     }
 }
