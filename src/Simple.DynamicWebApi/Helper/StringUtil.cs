@@ -14,12 +14,12 @@ internal static class StringUtil
     /// </summary>
     internal static string RemovePostFix(this string str, StringComparison comparisonType = StringComparison.Ordinal, params string[] postfixes)
     {
-        if (str.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(str))
         {
             return str;
         }
 
-        if (postfixes.IsNullOrEmpty())
+        if (postfixes == null || postfixes.Count() == 0 )
         {
             return str;
         }
@@ -40,12 +40,12 @@ internal static class StringUtil
     /// </summary>
     internal static string RemovePreFix(this string str, StringComparison comparisonType = StringComparison.Ordinal, params string[] preFixes)
     {
-        if (str.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(str))
         {
             return str;
         }
 
-        if (preFixes.IsNullOrEmpty())
+        if (preFixes == null || preFixes.Count() == 0)
         {
             return str;
         }
@@ -101,13 +101,5 @@ internal static class StringUtil
             }
         }
         return false;
-    }
-
-    /// <summary>
-    /// 判断字符串是否为空或null
-    /// </summary>
-    internal static bool IsNullOrEmpty(this string? str)
-    {
-        return string.IsNullOrEmpty(str);
     }
 }

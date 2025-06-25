@@ -40,6 +40,7 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         ConfigureApiExplorer(controller);
         ConfigureController(controller);
     }
+
     private void ConfigureApiExplorer(ControllerModel controller)
     {
         controller.ApiExplorer.IsVisible ??= true;
@@ -68,6 +69,7 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         ConfigureActionSelectors(action);
         ConfigureActionHttpMethodAttribute(action);
         ConfigureActionName(action);
+        ConfigureComplexParameterBinding(action);
         ConfigureActionRouteAttribute(action);
     }
 
@@ -119,11 +121,6 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         }
     }
 
-    private void ConfigureControllerRouteAttributes(ControllerModel controller)
-    {
-    }
-
-
     private void ConfigureControllerName(ControllerModel controller)
     {
         if (_options.RemoveControllerSuffix)
@@ -132,6 +129,10 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
                 .RemovePostFix(postfixes: _options.ControllerPostfixes);
         }
         controller.ControllerName = controller.ControllerName.ToKebabCase();
+    }
+
+    private void ConfigureControllerRouteAttributes(ControllerModel controller)
+    {
     }
 
     private void ConfigureActionName(ActionModel action)
@@ -290,5 +291,20 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         // 检查模板是否包含 [action] 令牌（不区分大小写）
         return !string.IsNullOrEmpty(controllerRouteTemplate) &&
                controllerRouteTemplate.Contains("[action]", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void ConfigureComplexParameterBinding(ActionModel action)
+    {
+        foreach (var parameter in action.Parameters)
+        {
+            if (parameter.BindingInfo != null) continue;
+
+            if (TypeHelper.IsSimpleType(parameter.ParameterType) ||
+                TypeHelper.IsFileType(parameter.ParameterType))
+                continue;
+
+            // 为复杂类型添加 [FromBody] 特性
+            parameter.BindingInfo = BindingInfo.GetBindingInfo(new[] { new FromBodyAttribute() });
+        }
     }
 }
