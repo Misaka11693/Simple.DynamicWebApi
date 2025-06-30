@@ -61,32 +61,6 @@ public static class TypeHelper
                typeof(IFormFileCollection).IsAssignableFrom(type);
     }
 
-    /// <summary>
-    /// 判断是否是可解析类型（支持Parse/TryParse方法）
-    /// </summary>
-    public static bool IsParsableType(Type type)
-    {
-        if (type == null) return false;
-
-        // 检查Parse方法
-        if (type.GetMethod("Parse",
-            BindingFlags.Public | BindingFlags.Static,
-            null,
-            new[] { typeof(string) },
-            null) != null)
-        {
-            return true;
-        }
-
-        // 检查TryParse方法
-        var tryParseMethod = type.GetMethod("TryParse",
-            BindingFlags.Public | BindingFlags.Static,
-            null,
-            new[] { typeof(string), type.MakeByRefType() },
-            null);
-
-        return tryParseMethod != null && tryParseMethod.ReturnType == typeof(bool);
-    }
 
     /// <summary>
     /// 判断是否是复杂类型（需要[FromBody]绑定）
@@ -96,8 +70,7 @@ public static class TypeHelper
         if (type == null) return false;
 
         return !IsSimpleType(type) &&
-               !IsFileType(type) &&
-               !IsParsableType(type);
+               !IsFileType(type);
     }
 
     /// <summary>
@@ -107,6 +80,6 @@ public static class TypeHelper
     {
         if (type == null) return false;
 
-        return IsSimpleType(type) || IsParsableType(type);
+        return IsSimpleType(type);
     }
 }

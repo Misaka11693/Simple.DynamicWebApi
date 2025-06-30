@@ -37,17 +37,6 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         ConfigureController(controller);
     }
 
-    private void ConfigureApiExplorer(ControllerModel controller)
-    {
-        controller.ApiExplorer.IsVisible ??= true;
-        controller.ApiExplorer.GroupName ??= controller.ControllerName;//Swagger文档分组为控制器名称,默认为控制器名称
-
-        foreach (var action in controller.Actions)
-        {
-            action.ApiExplorer.IsVisible ??= true;
-        }
-    }
-
     private void ConfigureController(ControllerModel controller)
     {
         RemoveEmptySelectors(controller.Selectors);
@@ -70,7 +59,16 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         ConfigureActionRouteAttribute(action);
     }
 
+    private void ConfigureApiExplorer(ControllerModel controller)
+    {
+        controller.ApiExplorer.IsVisible ??= true;
+        controller.ApiExplorer.GroupName ??= controller.ControllerName;//Swagger文档分组为控制器名称,默认为控制器名称
 
+        foreach (var action in controller.Actions)
+        {
+            action.ApiExplorer.IsVisible ??= true;
+        }
+    }
 
     internal void RemoveEmptySelectors(IList<SelectorModel> selectors)
     {
@@ -405,9 +403,9 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
             template += "/";
         }
 
-        // 构建路径参数部分（按方法参数顺序）
-        var parametersSegment = string.Join("/",pathParameters.Select(p => $"{{{p.Name.ToKebabCase()}}}"));
-
+        // 构建路径参数部分
+        //var parametersSegment = string.Join("/",pathParameters.Select(p => $"{{{p.Name.ToKebabCase()}}}"));
+        var parametersSegment = BuildParametersSegment(pathParameters);
         return template + parametersSegment;
     }
 
@@ -440,5 +438,25 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
         return suitableParameters
             .OrderBy(p => allParameters.IndexOf(p))
             .ToList();
+    }
+    private string BuildParametersSegment(IList<ParameterModel> parameters)
+    {
+        var segments = new List<string>();
+
+        foreach (var param in parameters)
+        {
+            var isNullable = param.ParameterType.IsGenericType &&
+                         param.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>);
+
+            var paramName = param.Name.ToKebabCase();
+
+            string segment = isNullable
+                ? $"{{{paramName}?}}"
+                : $"{{{paramName}}}";
+
+            segments.Add(segment);
+        }
+
+        return string.Join("/", segments);
     }
 }

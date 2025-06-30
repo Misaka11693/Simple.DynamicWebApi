@@ -19,11 +19,9 @@ namespace WebApplication1.Controllers
         {
             _logger = logger;
         }
-        //[HttpGet(Name = "ABCGetWeatherForecast")]
-        [Route("asd" + "[action]")]
-        [HttpPost]
-
-        public IEnumerable<WeatherForecast> GetASD(int a, int b)
+        //[HttpGet]
+        [HttpGet("mytest/{a}/{b?}")]
+        public IEnumerable<WeatherForecast> GetASD(int a, int? b)
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
