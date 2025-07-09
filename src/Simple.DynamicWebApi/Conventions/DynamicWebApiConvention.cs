@@ -448,7 +448,8 @@ public partial class DynamicWebApiConvention : IApplicationModelConvention
             var isNullable = param.ParameterType.IsGenericType &&
                          param.ParameterType.GetGenericTypeDefinition() == typeof(Nullable<>);
 
-            var paramName = param.Name.ToKebabCase();
+            //var paramName = param.Name.ToKebabCase();
+            var paramName = param.Name;//不对参数名进行kebab-case转换，因为这会导致路由匹配问题
 
             string segment = isNullable
                 ? $"{{{paramName}?}}"
